@@ -101,20 +101,65 @@ function openProgramBuilder(){openModal(`<h2>Νέο πρόγραμμα</h2><labe
 function suggestProgram(){const p=person();let candidates=starterPrograms.filter(x=>(p.place==='both'||x.place===p.place)&&(x.level===p.level||p.level==='advanced'));if(!candidates.length)candidates=starterPrograms;let pick=candidates.find(x=>x.goal===p.goal)||candidates[0];viewProgram(pick)}
 $('#suggestBtn').onclick=suggestProgram;$('#startTodayBtn').onclick=()=>{const a=(person().calendar||{})[todayISO()]||[];if(a.length)openWorkout(a[0],todayISO());else suggestProgram()};
 
-function renderCalendar(){const y=calDate.getFullYear(),m=calDate.getMonth();$('#calendarMonth').textContent=new Intl.DateTimeFormat('el-GR',{month:'long',year:'numeric'}).format(calDate);const first=new Date(y,m,1),offset=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate(),prevDays=new Date(y,m,0).getDate(),g=$('#calendarGrid');g.innerHTML='';for(let i=0;i<42;i++){let d,mon=m,yr=y,out=false;if(i<offset){d=prevDays-offset+i+1;mon=m-1;out=true}else if(i>=offset+days){d=i-offset-days+1;mon=m+1;out=true}else d=i-offset+1;const dt=new Date(yr,mon,d),iso=[dt.getFullYear(),String(dt.getMonth()+1).padStart(2,'0'),String(dt.getDate()).padStart(2,'0')].join('-');const b=document.createElement('button');b.className='day'+(out?' out':'')+(iso===todayISO()?' today':'')+(iso===selectedDate?' selected':'');b.innerHTML=`<span>${d}</span>${(person().calendar[iso]||[]).length?'<i class="dot"></i>':''}`;b.onclick=()=>{selectedDate=iso;renderCalendar();openCalendarDayActions(iso)};g.appendChild(b)}renderDayPanel()}
-function renderDayPanel(){ $('#selectedDateTitle').textContent=fmtDate(selectedDate);const a=person().calendar[selectedDate]||[],g=$('#dayEntries');g.innerHTML='';if(!a.length)g.innerHTML='<p class="muted">Δεν υπάρχει προγραμματισμένη προπόνηση.</p>';a.forEach(e=>{const row=document.createElement('div');row.className='entry'+(e.done?' done':'');row.innerHTML=`<div class="grow"><b>${esc(e.title)}</b><span class="muted small">${e.done?'Ολοκληρώθηκε':'Προγραμματισμένη'}</span></div><button class="primary">${e.done?'Προβολή':'Έναρξη'}</button><button class="danger">×</button>`;row.querySelector('.primary').onclick=()=>openWorkout(e,selectedDate);row.querySelector('.danger').onclick=()=>{person().calendar[selectedDate]=a.filter(x=>x.id!==e.id);save();renderCalendar()};g.appendChild(row)})}
-$('#prevMonth').onclick=()=>{calDate.setMonth(calDate.getMonth()-1);renderCalendar()};$('#nextMonth').onclick=()=>{calDate.setMonth(calDate.getMonth()+1);renderCalendar()};$('#calendarTodayBtn').onclick=()=>{calDate=new Date();selectedDate=todayISO();renderCalendar()};
+function renderCalendar(){
+ const y=calDate.getFullYear(),m=calDate.getMonth();
+ $('#calendarMonth').textContent=new Intl.DateTimeFormat('el-GR',{month:'long',year:'numeric'}).format(calDate);
+ const first=new Date(y,m,1),offset=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate(),prevDays=new Date(y,m,0).getDate(),g=$('#calendarGrid');
+ g.innerHTML='';
+ for(let i=0;i<42;i++){
+  let d,mon=m,yr=y,out=false;
+  if(i<offset){d=prevDays-offset+i+1;mon=m-1;out=true}
+  else if(i>=offset+days){d=i-offset-days+1;mon=m+1;out=true}
+  else d=i-offset+1;
+  const dt=new Date(yr,mon,d),iso=[dt.getFullYear(),String(dt.getMonth()+1).padStart(2,'0'),String(dt.getDate()).padStart(2,'0')].join('-');
+  const b=document.createElement('button');
+  b.type='button';
+  b.className='day'+(out?' out':'')+(iso===todayISO()?' today':'')+(iso===selectedDate?' selected':'');
+  b.innerHTML=`<span>${d}</span>${(person().calendar[iso]||[]).length?'<i class="dot"></i>':''}`;
+  b.onclick=()=>{
+   selectedDate=iso;
+   renderCalendar();
+   showDayQuickActions(iso);
+  };
+  g.appendChild(b);
+ }
+ renderDayPanel();
+}
+function renderDayPanel(){
+ $('#selectedDateTitle').textContent=fmtDate(selectedDate);
+ const a=person().calendar[selectedDate]||[],g=$('#dayEntries');g.innerHTML='';
+ if(!a.length)g.innerHTML='<p class="muted">Δεν υπάρχει καταχωρισμένη προπόνηση.</p>';
+ a.forEach(e=>{
+  const row=document.createElement('div');row.className='entry'+(e.done?' done':'');
+  row.innerHTML=`<div class="grow"><b>${esc(e.title)}</b><span class="muted small">${e.done?'Ολοκληρώθηκε':'Προγραμματισμένη'}</span></div><button type="button" class="primary">${e.done?'Προβολή':'Έναρξη'}</button><button type="button" class="danger">×</button>`;
+  row.querySelector('.primary').onclick=()=>openWorkout(e,selectedDate);
+  row.querySelector('.danger').onclick=()=>{person().calendar[selectedDate]=a.filter(x=>x.id!==e.id);save();renderCalendar()};
+  g.appendChild(row)
+ })
+}
+$('#prevMonth').onclick=()=>{calDate.setMonth(calDate.getMonth()-1);renderCalendar()};
+$('#nextMonth').onclick=()=>{calDate.setMonth(calDate.getMonth()+1);renderCalendar()};
+$('#calendarTodayBtn').onclick=()=>{calDate=new Date();selectedDate=todayISO();renderCalendar()};
 function addSimpleWorkout(date=selectedDate){
  const per=person();per.calendar[date]=per.calendar[date]||[];
  per.calendar[date].push({id:uid(),title:'Προπόνηση',done:true,duration:0,exercises:[],completedAt:new Date().toISOString()});
- closeModal();save();renderCalendar();toast('Η προπόνηση καταχωρίστηκε');
+ hideDayQuickActions();
+ save();renderCalendar();toast('Η προπόνηση καταχωρίστηκε');
 }
-function openCalendarDayActions(date){
- const entries=person().calendar[date]||[];
- openModal(`<h2>${fmtDate(date)}</h2><p class="muted">Πάτησε το κουμπί για να σημειώσεις απλώς ότι έκανες προπόνηση. Δεν χρειάζεται να γράψεις ασκήσεις ή διάρκεια.</p><button type="button" class="primary full-action" id="quickAddWorkout">+ Καταχώριση προπόνησης</button>${entries.length?`<button type="button" class="secondary full-action" id="viewDayWorkouts">Προβολή προπονήσεων (${entries.length})</button>`:''}<div class="modal-actions"><button value="cancel" class="secondary">Κλείσιμο</button></div>`);
- $('#quickAddWorkout').onclick=()=>addSimpleWorkout(date);
- const view=$('#viewDayWorkouts');if(view)view.onclick=()=>{closeModal();selectedDate=date;renderDayPanel();document.querySelector('#dayPanel')?.scrollIntoView({behavior:'smooth',block:'center'})};
+function showDayQuickActions(date){
+ let box=document.querySelector('#dayQuickActions');
+ if(!box){
+  box=document.createElement('div');box.id='dayQuickActions';box.className='day-action-overlay';
+  box.innerHTML=`<div class="day-action-card"><button type="button" class="day-action-close" aria-label="Κλείσιμο">×</button><div class="eyebrow">ΕΠΙΛΕΓΜΕΝΗ ΗΜΕΡΑ</div><h2 id="quickDateTitle"></h2><p>Θέλεις να σημειώσεις ότι έκανες προπόνηση αυτή την ημέρα;</p><button type="button" class="primary day-action-add">+ Προσθήκη προπόνησης</button><p class="muted small">Δεν χρειάζεται να γράψεις ασκήσεις ή διάρκεια.</p></div>`;
+  document.body.appendChild(box);
+  box.querySelector('.day-action-close').onclick=hideDayQuickActions;
+  box.addEventListener('click',e=>{if(e.target===box)hideDayQuickActions()});
+ }
+ box.querySelector('#quickDateTitle').textContent=fmtDate(date);
+ box.querySelector('.day-action-add').onclick=()=>addSimpleWorkout(date);
+ box.classList.add('show');
 }
+function hideDayQuickActions(){document.querySelector('#dayQuickActions')?.classList.remove('show')}
 $('#addDayWorkoutBtn').onclick=()=>addSimpleWorkout(selectedDate);
 function openWorkout(entry,date){
  entry.exercises=entry.exercises||[];openModal(`<h2>${esc(entry.title)}</h2><p class="muted">${fmtDate(date)}</p><label>Διάρκεια προπόνησης (λεπτά)<input id="workoutDuration" type="number" min="0" value="${entry.duration||''}" placeholder="π.χ. 60"></label><h3>Ασκήσεις</h3><div id="workoutEditor" class="workout-editor"></div><button type="button" class="secondary" id="addWorkoutExercise">+ Άσκηση</button><div class="modal-actions"><button value="cancel" class="secondary">Κλείσιμο</button><button type="button" class="secondary" id="saveWorkoutChanges">Αποθήκευση αλλαγών</button><button type="button" class="primary" id="finishWorkout">${entry.done?'Αποθήκευση ως ολοκληρωμένη':'Ολοκλήρωση'}</button></div>`);
@@ -177,5 +222,5 @@ function openModal(html){$('#modalContent').innerHTML=html;$('#modal').showModal
 function closeModal(){$('#modal').close()}
 function esc(s=''){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});}if('caches' in window){caches.keys().then(keys=>keys.forEach(k=>caches.delete(k))).catch(()=>{});}
 renderAll();renderCalendar();
