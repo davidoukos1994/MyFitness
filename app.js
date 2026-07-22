@@ -111,7 +111,51 @@ function openWorkout(entry,date){
  $('#saveWorkoutChanges').onclick=()=>{collect();closeModal();save();renderCalendar();toast('Οι αλλαγές αποθηκεύτηκαν')};$('#finishWorkout').onclick=()=>{collect();entry.done=true;entry.completedAt=new Date().toISOString();closeModal();save();renderCalendar();toast('Η προπόνηση αποθηκεύτηκε')};
 }
 function exercisePose(name){const n=name.toLowerCase();if(n.includes('κάμψ')||n.includes('πιέσεις στήθους'))return 'push';if(n.includes('κωπηλα'))return 'row';if(n.includes('καθίσ')||n.includes('προβολ'))return 'squat';if(n.includes('άρσεις θανάτου'))return 'hinge';if(n.includes('σανίδα')||n.includes('ορειβά'))return 'plank';if(n.includes('ώμων')||n.includes('πλάγιες άρσεις'))return 'press';if(n.includes('δικεφάλ'))return 'curl';if(n.includes('τρικεφάλ'))return 'triceps';if(n.includes('γέφυρ'))return 'bridge';return 'general'}
-function exerciseSvg(name){const pose=exercisePose(name),base=`<svg viewBox="0 0 640 300" role="img" aria-label="Ενδεικτική εικόνα εκτέλεσης ${esc(name)}"><defs><style>.f{fill:none;stroke:currentColor;stroke-width:10;stroke-linecap:round;stroke-linejoin:round}.w{fill:var(--primary)}.t{fill:var(--muted);font:20px system-ui}</style></defs><text class="t" x="110" y="35">Αρχική θέση</text><text class="t" x="430" y="35">Τελική θέση</text>`;const fig=(x,y,kind,end)=>{if(kind==='squat')return `<circle class="f" cx="${x}" cy="${y-90}" r="22"/><path class="f" d="M${x} ${y-66} L${x+(end?18:0)} ${y-10} L${x+(end?55:25)} ${y+32} M${x+(end?18:0)} ${y-25} L${x-40} ${y+20} M${x+(end?18:0)} ${y-25} L${x+48} ${y+10}"/><circle class="w" cx="${x-43}" cy="${y+21}" r="10"/><circle class="w" cx="${x+51}" cy="${y+11}" r="10"/>`;if(kind==='push'||kind==='plank')return `<circle class="f" cx="${x-65}" cy="${y-42+(end?26:0)}" r="18"/><path class="f" d="M${x-45} ${y-35+(end?25:0)} L${x+55} ${y-5} L${x+110} ${y+18} M${x-10} ${y-25+(end?20:0)} L${x-20} ${y+35} M${x+65} ${y} L${x+45} ${y+50}"/>`;if(kind==='hinge'||kind==='row')return `<circle class="f" cx="${x-20+(end?35:0)}" cy="${y-92+(end?20:0)}" r="20"/><path class="f" d="M${x-8+(end?30:0)} ${y-70+(end?18:0)} L${x+30} ${y-20} L${x+5} ${y+45} M${x+25} ${y-25} L${x-45} ${y+20} M${x+25} ${y-25} L${x+80} ${y+20}"/><circle class="w" cx="${x-48}" cy="${y+22}" r="10"/><circle class="w" cx="${x+83}" cy="${y+22}" r="10"/>`;if(kind==='bridge')return `<circle class="f" cx="${x-75}" cy="${y+5-(end?35:0)}" r="19"/><path class="f" d="M${x-55} ${y+5-(end?35:0)} L${x+20} ${y-(end?35:0)} L${x+80} ${y+35} M${x+15} ${y-(end?35:0)} L${x-15} ${y+42}"/>`;return `<circle class="f" cx="${x}" cy="${y-90}" r="22"/><path class="f" d="M${x} ${y-65} L${x} ${y+20} M${x} ${y-35} L${x-50} ${y-(end?80:0)} M${x} ${y-35} L${x+50} ${y-(end?80:0)} M${x} ${y+20} L${x-35} ${y+80} M${x} ${y+20} L${x+35} ${y+80}"/><circle class="w" cx="${x-53}" cy="${y-(end?82:0)}" r="10"/><circle class="w" cx="${x+53}" cy="${y-(end?82:0)}" r="10"/>`};return base+fig(165,170,pose,false)+`<path class="f" d="M285 150 L355 150 M340 135 L355 150 L340 165"/>`+fig(475,170,pose,true)+`</svg>`}
+function exerciseSvg(name){
+ const pose=exercisePose(name);
+ const head=(x,y)=>`<ellipse class="skin" cx="${x}" cy="${y}" rx="18" ry="22"/><path class="hair" d="M${x-17} ${y-5} Q${x} ${y-27} ${x+18} ${y-5} Q${x+5} ${y-15} ${x-17} ${y-5}"/>`;
+ const dumbbell=(x,y,rot=0)=>`<g transform="translate(${x} ${y}) rotate(${rot})"><rect class="metal" x="-16" y="-4" width="32" height="8" rx="4"/><rect class="weight" x="-28" y="-11" width="10" height="22" rx="3"/><rect class="weight" x="18" y="-11" width="10" height="22" rx="3"/></g>`;
+ const standing=(x,end,kind)=>{
+   const hy=70, shoulder=112, hip=178, knee=225, foot=272;
+   let arms='',legs='',torso=`<path class="shirt" d="M${x-34} ${shoulder} Q${x} ${shoulder-12} ${x+34} ${shoulder} L${x+24} ${hip} Q${x} ${hip+10} ${x-24} ${hip} Z"/>`;
+   if(kind==='squat'){
+     const dy=end?34:0, hx=x+(end?18:0), sy=shoulder+dy, hipy=hip+dy;
+     torso=`<path class="shirt" d="M${x-32} ${sy} Q${hx} ${sy-12} ${x+38} ${sy+8} L${x+18} ${hipy} Q${hx} ${hipy+8} ${x-20} ${hipy-3} Z"/>`;
+     legs=`<path class="limb" d="M${x-12} ${hipy} L${x-48} ${end?220:225} L${x-70} ${foot}"/><path class="limb" d="M${x+12} ${hipy} L${x+58} ${end?220:225} L${x+76} ${foot}"/><path class="shoe" d="M${x-83} ${foot} h34"/><path class="shoe" d="M${x+61} ${foot} h34"/>`;
+     arms=`<path class="arm" d="M${x-24} ${sy+15} L${x-58} ${sy+42} L${x-40} ${sy+62}"/><path class="arm" d="M${x+24} ${sy+15} L${x+58} ${sy+42} L${x+40} ${sy+62}"/>${dumbbell(x-42,sy+64)}${dumbbell(x+42,sy+64)}`;
+     return `<g>${head(x+(end?18:0),hy+dy)}${torso}${arms}${legs}</g>`;
+   }
+   if(kind==='press'){
+     legs=`<path class="limb" d="M${x-12} ${hip} L${x-18} ${knee} L${x-28} ${foot}"/><path class="limb" d="M${x+12} ${hip} L${x+18} ${knee} L${x+28} ${foot}"/><path class="shoe" d="M${x-42} ${foot} h30"/><path class="shoe" d="M${x+14} ${foot} h30"/>`;
+     if(end){arms=`<path class="arm" d="M${x-24} ${shoulder+15} L${x-42} 86 L${x-40} 42"/><path class="arm" d="M${x+24} ${shoulder+15} L${x+42} 86 L${x+40} 42"/>${dumbbell(x-40,34)}${dumbbell(x+40,34)}`}
+     else{arms=`<path class="arm" d="M${x-24} ${shoulder+15} L${x-58} 132 L${x-44} 96"/><path class="arm" d="M${x+24} ${shoulder+15} L${x+58} 132 L${x+44} 96"/>${dumbbell(x-44,91)}${dumbbell(x+44,91)}`}
+   } else if(kind==='curl'){
+     legs=`<path class="limb" d="M${x-12} ${hip} L${x-18} ${knee} L${x-28} ${foot}"/><path class="limb" d="M${x+12} ${hip} L${x+18} ${knee} L${x+28} ${foot}"/><path class="shoe" d="M${x-42} ${foot} h30"/><path class="shoe" d="M${x+14} ${foot} h30"/>`;
+     arms=end?`<path class="arm" d="M${x-24} ${shoulder+15} L${x-42} 155 L${x-52} 116"/><path class="arm" d="M${x+24} ${shoulder+15} L${x+42} 155 L${x+52} 116"/>${dumbbell(x-54,108)}${dumbbell(x+54,108)}`:`<path class="arm" d="M${x-24} ${shoulder+15} L${x-40} 166 L${x-44} 208"/><path class="arm" d="M${x+24} ${shoulder+15} L${x+40} 166 L${x+44} 208"/>${dumbbell(x-44,214)}${dumbbell(x+44,214)}`;
+   } else {
+     legs=`<path class="limb" d="M${x-12} ${hip} L${x-18} ${knee} L${x-28} ${foot}"/><path class="limb" d="M${x+12} ${hip} L${x+18} ${knee} L${x+28} ${foot}"/><path class="shoe" d="M${x-42} ${foot} h30"/><path class="shoe" d="M${x+14} ${foot} h30"/>`;
+     arms=`<path class="arm" d="M${x-24} ${shoulder+15} L${x-48} 164 L${x-50} 210"/><path class="arm" d="M${x+24} ${shoulder+15} L${x+48} 164 L${x+50} 210"/>${dumbbell(x-50,216)}${dumbbell(x+50,216)}`;
+   }
+   return `<g>${head(x,hy)}${torso}${arms}${legs}</g>`;
+ };
+ const floorPose=(x,end,kind)=>{
+   if(kind==='push'||kind==='plank'){
+     const y=end&&kind==='push'?210:176;
+     return `<g>${head(x-78,y-26)}<path class="shirt" d="M${x-55} ${y-20} L${x+34} ${y-2} L${x+28} ${y+25} L${x-60} ${y+8} Z"/><path class="limb" d="M${x+30} ${y+10} L${x+92} ${y+24} L${x+128} ${y+28}"/><path class="arm" d="M${x-42} ${y-3} L${x-30} ${end?250:225} L${x-10} ${end?250:225}"/><path class="shoe" d="M${x+115} ${y+28} h28"/></g>`;
+   }
+   if(kind==='bridge'){
+     const lift=end?44:0;
+     return `<g>${head(x-88,220-lift)}<path class="shirt" d="M${x-66} ${216-lift} L${x+15} ${205-lift} L${x+40} ${228-lift} L${x-58} ${242-lift} Z"/><path class="limb" d="M${x+35} ${224-lift} L${x+76} 252 L${x+110} 252"/><path class="arm" d="M${x-45} ${230-lift} L${x-20} 258"/><path class="shoe" d="M${x+95} 252 h30"/></g>`;
+   }
+   return standing(x,end,kind);
+ };
+ const hinge=(x,end,kind)=>{
+   const tilt=end?20:0;
+   return `<g transform="rotate(${tilt} ${x} 175)">${head(x-8,72)}<path class="shirt" d="M${x-35} 108 Q${x} 96 ${x+34} 112 L${x+26} 178 L${x-20} 181 Z"/><path class="limb" d="M${x-10} 178 L${x-26} 226 L${x-32} 274"/><path class="limb" d="M${x+12} 178 L${x+30} 226 L${x+36} 274"/><path class="arm" d="M${x-25} 124 L${x-55} ${end?170:202} L${x-52} ${end?216:232}"/><path class="arm" d="M${x+25} 124 L${x+55} ${end?170:202} L${x+52} ${end?216:232}"/>${dumbbell(x-52,end?220:238)}${dumbbell(x+52,end?220:238)}<path class="shoe" d="M${x-47} 274 h30"/><path class="shoe" d="M${x+21} 274 h30"/></g>`;
+ };
+ const fig=(x,end)=> pose==='hinge'||pose==='row'?hinge(x,end,pose):pose==='push'||pose==='plank'||pose==='bridge'?floorPose(x,end,pose):standing(x,end,pose);
+ return `<svg viewBox="0 0 760 340" role="img" aria-label="Οδηγίες εκτέλεσης ${esc(name)}"><defs><style>.skin{fill:#d7a47e;stroke:#684b3d;stroke-width:3}.hair{fill:#3b2a22}.shirt{fill:var(--primary);stroke:#263746;stroke-width:4;stroke-linejoin:round}.limb,.arm{fill:none;stroke:#d7a47e;stroke-width:18;stroke-linecap:round;stroke-linejoin:round}.shoe{fill:none;stroke:#263746;stroke-width:12;stroke-linecap:round}.metal{fill:#6b7884}.weight{fill:#263746}.label{fill:var(--text);font:600 19px system-ui}.hint{fill:var(--muted);font:16px system-ui}.arrow{fill:none;stroke:var(--primary);stroke-width:8;stroke-linecap:round;stroke-linejoin:round}</style></defs><rect x="14" y="14" width="350" height="312" rx="22" fill="var(--surface-2)"/><rect x="396" y="14" width="350" height="312" rx="22" fill="var(--surface-2)"/><text class="label" x="189" y="42" text-anchor="middle">Αρχική θέση</text><text class="label" x="571" y="42" text-anchor="middle">Τελική θέση</text>${fig(190,false)}${fig(570,true)}<path class="arrow" d="M365 170 H393 M383 158 L395 170 L383 182"/></svg>`;
+}
 function showExercise(name,fromModal=false){const previous=fromModal?$('#modalContent').innerHTML:null;openModal(`<h2>${esc(name)}</h2><div class="exercise-figure">${exerciseSvg(name)}</div><p class="muted">Η εικόνα δείχνει ενδεικτικά την αρχική και την τελική θέση της άσκησης.</p><div class="modal-actions"><button value="cancel" class="primary">Κλείσιμο</button></div>`)}
 
 $('#themeBtn').onclick=()=>{state.theme=state.theme==='dark'?'light':'dark';save()};
