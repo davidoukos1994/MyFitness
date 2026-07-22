@@ -1,3 +1,5 @@
+FitPlanner V1.5
+
 FITPLANNER V1 — ΟΔΗΓΙΕΣ GITHUB PAGES
 
 1. Αποσυμπίεσε το ZIP.
