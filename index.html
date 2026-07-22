@@ -91,6 +91,10 @@
           <article class="card assessment"><span>Ενδεικτικό εύρος βάρους</span><strong id="weightRange">—</strong><small>Με βάση BMI 18,5–24,9</small></article>
           <article class="card assessment"><span>Μέση / Ύψος</span><strong id="whrValue">—</strong><small id="whrLabel">Πρόσθεσε περίμετρο μέσης</small></article>
         </div>
+        <div class="card progress-chart-card">
+          <div class="section-head compact"><h3>Διάγραμμα βάρους</h3></div>
+          <div id="weightChart" class="weight-chart" aria-label="Διάγραμμα εξέλιξης βάρους"></div>
+        </div>
         <div class="card">
           <div class="section-head compact"><h3>Ιστορικό</h3></div>
           <div id="measurementHistory" class="stack"></div>
@@ -102,7 +106,10 @@
         <div class="section-head"><div><div class="eyebrow">ΡΥΘΜΙΣΕΙΣ</div><h2>Προφίλ και στόχοι</h2></div><button class="primary" id="saveProfileBtn">Αποθήκευση</button></div>
         <form id="profileForm" class="form-grid card">
           <label>Όνομα<input name="name" required /></label>
-          <label>Ημερομηνία γέννησης<input type="date" name="birthdate" /></label>
+          <label>Ημερομηνία γέννησης
+            <input type="hidden" name="birthdate" id="birthdateHidden" />
+            <div class="date-parts"><select id="birthDay" aria-label="Ημέρα"></select><select id="birthMonth" aria-label="Μήνας"></select><select id="birthYear" aria-label="Έτος"></select></div>
+          </label>
           <label>Φύλο<select name="sex"><option value="">Δεν δηλώνεται</option><option value="male">Άνδρας</option><option value="female">Γυναίκα</option></select></label>
           <label>Ύψος (cm)<input type="number" inputmode="decimal" name="height" min="100" max="250" /></label>
           <label>Βάρος (kg)<input type="number" inputmode="decimal" step="0.1" name="weight" min="30" max="350" /></label>
