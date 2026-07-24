@@ -9,14 +9,14 @@
   <meta name="apple-mobile-web-app-title" content="FitPlanner" />
   <title>FitPlanner</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css?v=1.6.0" />
+  <link rel="stylesheet" href="styles.css?v=2.0.0" />
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
       <div>
         <div class="eyebrow">ΠΡΟΣΩΠΙΚΟ ΗΜΕΡΟΛΟΓΙΟ ΓΥΜΝΑΣΤΙΚΗΣ</div>
-        <h1>FitPlanner <small class="version-mark">v1.9</small></h1>
+        <h1>FitPlanner <small class="version-mark">v2.0</small></h1>
       </div>
       <button class="icon-btn" id="themeBtn" aria-label="Αλλαγή εμφάνισης">◐</button>
     </header>
@@ -78,8 +78,16 @@
 
       <section class="view" data-view="programs">
         <div class="section-head"><div><div class="eyebrow">ΑΣΚΗΣΕΙΣ</div><h2>Προγράμματα</h2></div><button class="primary" id="newProgramBtn">+ Νέο πρόγραμμα</button></div>
-        <div class="filters">
-          <button class="chip active" data-filter="all">Όλα</button><button class="chip" data-filter="home">Σπίτι</button><button class="chip" data-filter="gym">Γυμναστήριο</button><button class="chip" data-filter="beginner">Αρχάριος</button>
+        <div class="filters program-tabs" aria-label="Κατηγορίες προγραμμάτων">
+          <button class="chip active" data-filter="all">Όλα</button>
+          <button class="chip" data-filter="chest">Στήθος</button>
+          <button class="chip" data-filter="back">Πλάτη</button>
+          <button class="chip" data-filter="shoulders">Ώμοι</button>
+          <button class="chip" data-filter="legs">Πόδια</button>
+          <button class="chip" data-filter="abs">Κοιλιακοί</button>
+          <button class="chip" data-filter="full">Όλο το σώμα</button>
+          <button class="chip" data-filter="home">Σπίτι</button>
+          <button class="chip" data-filter="gym">Γυμναστήριο</button>
         </div>
         <div id="programGrid" class="program-grid"></div>
       </section>
@@ -139,6 +147,6 @@
 
   <dialog id="modal"><form method="dialog" id="modalForm"><div id="modalContent"></div></form></dialog>
   <div id="toast"></div>
-  <script src="app.js?v=1.6.0"></script>
+  <script src="app.js?v=2.0.0"></script>
 </body>
 </html>

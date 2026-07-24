@@ -22,3 +22,23 @@
 @media(max-width:600px){.real-exercise-grid{grid-template-columns:1fr;gap:8px}.exercise-arrow{transform:rotate(90deg);text-align:center;line-height:1}.real-exercise-image{height:250px}}
 
 .exercise-guide{display:grid;gap:12px;margin-top:16px}.exercise-guide section{background:var(--surface2);border:1px solid var(--line);border-radius:16px;padding:15px}.exercise-guide h3{font-size:16px;margin:0 0 8px}.exercise-guide p{margin:0;line-height:1.55}.exercise-guide ul{margin:0;padding-left:20px;display:grid;gap:6px;line-height:1.45}.exercise-guide li::marker{color:var(--primary)}
+
+/* v2.0 — μαζεμένες κάρτες προγραμμάτων */
+.program-grid{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
+.program-card{padding:0;overflow:hidden}
+.program-summary{width:100%;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;text-align:left;border:0;background:transparent;color:var(--text);padding:18px;cursor:pointer}
+.program-summary h3{margin:12px 0 5px}.program-summary small{color:var(--muted)}
+.program-chevron{font-size:26px;line-height:1;transition:transform .2s;color:var(--primary)}
+.program-card.open .program-chevron{transform:rotate(180deg)}
+.program-details{display:none;padding:0 18px 18px;border-top:1px solid var(--line)}
+.program-card.open .program-details{display:block;animation:fade .18s ease}
+.program-details ul{min-height:0;margin:14px 0;padding-left:18px}
+.program-details .actions{display:flex;gap:8px;flex-wrap:wrap}
+.program-tabs{padding:4px 0 10px;margin-bottom:4px}
+.program-builder-filters{padding:0;margin-top:12px}
+.suggestion-box{border:1px solid var(--line);background:var(--surface2);border-radius:16px;padding:14px;margin:12px 0}
+.suggestion-box p{margin:5px 0 10px}.suggestion-chips{display:flex;gap:7px;flex-wrap:wrap;max-height:180px;overflow:auto}
+.suggestion-add{font-size:12px;padding:8px 10px;background:var(--surface)}
+.exercise-select{margin-top:0}
+@media(max-width:900px){.program-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.program-grid{grid-template-columns:1fr}.program-summary{padding:16px}.program-details{padding:0 16px 16px}.program-tabs{position:sticky;top:0;z-index:5;background:var(--bg);padding-top:8px}}
