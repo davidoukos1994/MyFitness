@@ -197,7 +197,7 @@ function openWorkout(entry,date){
  const collect=()=>{entry.duration=Number($('#workoutDuration').value||0);entry.exercises=$$('#workoutEditor .workout-exercise-row').map(r=>[r.querySelector('.we-name').value.trim(),Number(r.querySelector('.we-sets').value||1),Number(r.querySelector('.we-reps').value||1)]).filter(x=>x[0]);};
  $('#saveWorkoutChanges').onclick=()=>{collect();closeModal();save();renderCalendar();toast('Οι αλλαγές αποθηκεύτηκαν')};$('#finishWorkout').onclick=()=>{collect();entry.done=true;entry.completedAt=new Date().toISOString();closeModal();save();renderCalendar();toast('Η προπόνηση αποθηκεύτηκε')};
 }
-function exercisePose(name){const n=name.toLowerCase();if(n.includes('κάμψ')||n.includes('πιέσεις στήθους'))return 'push';if(n.includes('κωπηλα'))return 'row';if(n.includes('καθίσ')||n.includes('προβολ'))return 'squat';if(n.includes('άρσεις θανάτου'))return 'hinge';if(n.includes('σανίδα')||n.includes('ορειβά'))return 'plank';if(n.includes('ώμων')||n.includes('πλάγιες άρσεις'))return 'press';if(n.includes('δικεφάλ'))return 'curl';if(n.includes('τρικεφάλ'))return 'triceps';if(n.includes('γέφυρ'))return 'bridge';return 'general'}
+function exercisePose(name){const n=name.toLowerCase();if(n.includes('βυθίσεις'))return 'dip';if(n.includes('προβολ'))return 'lunge';if(n.includes('κάμψ')||n.includes('πιέσεις στήθους'))return 'push';if(n.includes('κωπηλα'))return 'row';if(n.includes('καθίσ'))return 'squat';if(n.includes('άρσεις θανάτου'))return 'hinge';if(n.includes('σανίδα')||n.includes('ορειβά'))return 'plank';if(n.includes('ώμων')||n.includes('πλάγιες άρσεις'))return 'press';if(n.includes('δικεφάλ'))return 'curl';if(n.includes('τρικεφάλ'))return 'triceps';if(n.includes('γέφυρ'))return 'bridge';return 'general'}
 function exerciseSvg(name){
  const pose=exercisePose(name);
  const head=(x,y)=>`<ellipse class="skin" cx="${x}" cy="${y}" rx="18" ry="22"/><path class="hair" d="M${x-17} ${y-5} Q${x} ${y-27} ${x+18} ${y-5} Q${x+5} ${y-15} ${x-17} ${y-5}"/>`;
@@ -240,7 +240,9 @@ function exerciseSvg(name){
    const tilt=end?20:0;
    return `<g transform="rotate(${tilt} ${x} 175)">${head(x-8,72)}<path class="shirt" d="M${x-35} 108 Q${x} 96 ${x+34} 112 L${x+26} 178 L${x-20} 181 Z"/><path class="limb" d="M${x-10} 178 L${x-26} 226 L${x-32} 274"/><path class="limb" d="M${x+12} 178 L${x+30} 226 L${x+36} 274"/><path class="arm" d="M${x-25} 124 L${x-55} ${end?170:202} L${x-52} ${end?216:232}"/><path class="arm" d="M${x+25} 124 L${x+55} ${end?170:202} L${x+52} ${end?216:232}"/>${dumbbell(x-52,end?220:238)}${dumbbell(x+52,end?220:238)}<path class="shoe" d="M${x-47} 274 h30"/><path class="shoe" d="M${x+21} 274 h30"/></g>`;
  };
- const fig=(x,end)=> pose==='hinge'||pose==='row'?hinge(x,end,pose):pose==='push'||pose==='plank'||pose==='bridge'?floorPose(x,end,pose):standing(x,end,pose);
+ const lunge=(x,end)=>{const back=end?70:34, drop=end?34:0;return `<g>${head(x,70+drop)}<path class="shirt" d="M${x-32} ${112+drop} Q${x} ${100+drop} ${x+32} ${112+drop} L${x+24} ${178+drop} Q${x} ${188+drop} ${x-24} ${178+drop} Z"/><path class="arm" d="M${x-24} ${128+drop} L${x-46} ${166+drop} L${x-48} ${212+drop}"/><path class="arm" d="M${x+24} ${128+drop} L${x+46} ${166+drop} L${x+48} ${212+drop}"/>${dumbbell(x-48,218+drop)}${dumbbell(x+48,218+drop)}<path class="limb" d="M${x-10} ${178+drop} L${x-58} ${220+drop} L${x-96} ${270}"/><path class="limb" d="M${x+10} ${178+drop} L${x+back} ${222+drop} L${x+104} ${270}"/><path class="shoe" d="M${x-110} 270 h34"/><path class="shoe" d="M${x+88} 270 h34"/></g>`};
+ const dip=(x,end)=>{const y=end?168:132;return `<g><rect x="${x-78}" y="${y+40}" width="156" height="18" rx="8" fill="#718096"/><rect x="${x+52}" y="${y+55}" width="14" height="95" rx="6" fill="#718096"/>${head(x-22,y-52)}<path class="shirt" d="M${x-52} ${y-18} Q${x-20} ${y-32} ${x+12} ${y-14} L${x+2} ${y+45} Q${x-24} ${y+53} ${x-50} ${y+38} Z"/><path class="arm" d="M${x-44} ${y-4} L${x-70} ${y+36} L${x-66} ${end?y+72:y+48}"/><path class="arm" d="M${x+2} ${y-2} L${x+34} ${y+36} L${x+30} ${end?y+72:y+48}"/><path class="limb" d="M${x-18} ${y+42} L${x+56} ${y+70} L${x+106} ${y+112}"/><path class="limb" d="M${x-4} ${y+42} L${x+68} ${y+82} L${x+116} ${y+122}"/><path class="shoe" d="M${x+94} ${y+112} h30"/><path class="shoe" d="M${x+104} ${y+122} h30"/></g>`};
+ const fig=(x,end)=> pose==='lunge'?lunge(x,end):pose==='dip'?dip(x,end):pose==='hinge'||pose==='row'?hinge(x,end,pose):pose==='push'||pose==='plank'||pose==='bridge'?floorPose(x,end,pose):standing(x,end,pose);
  return `<svg viewBox="0 0 760 340" role="img" aria-label="Οδηγίες εκτέλεσης ${esc(name)}"><defs><style>.skin{fill:#d7a47e;stroke:#684b3d;stroke-width:3}.hair{fill:#3b2a22}.shirt{fill:var(--primary);stroke:#263746;stroke-width:4;stroke-linejoin:round}.limb,.arm{fill:none;stroke:#d7a47e;stroke-width:18;stroke-linecap:round;stroke-linejoin:round}.shoe{fill:none;stroke:#263746;stroke-width:12;stroke-linecap:round}.metal{fill:#6b7884}.weight{fill:#263746}.label{fill:var(--text);font:600 19px system-ui}.hint{fill:var(--muted);font:16px system-ui}.arrow{fill:none;stroke:var(--primary);stroke-width:8;stroke-linecap:round;stroke-linejoin:round}</style></defs><rect x="14" y="14" width="350" height="312" rx="22" fill="var(--surface-2)"/><rect x="396" y="14" width="350" height="312" rx="22" fill="var(--surface-2)"/><text class="label" x="189" y="42" text-anchor="middle">Αρχική θέση</text><text class="label" x="571" y="42" text-anchor="middle">Τελική θέση</text>${fig(190,false)}${fig(570,true)}<path class="arrow" d="M365 170 H393 M383 158 L395 170 L383 182"/></svg>`;
 }
 function exerciseImagePair(name){
@@ -255,10 +257,12 @@ function exerciseImagePair(name){
   triceps:['One-arm-triceps-extension-1.png','One-arm-triceps-extension-2.png'],
   bridge:['Squats-1.png','Squats-2-1.png'],
   plank:['Push-up-1.png','Push-up-2.png'],
-  general:['Dumbbell-shoulder-press-1.png','Dumbbell-shoulder-press-2.png']
+  lunge:['Lunges-1.png','Lunges-2-1.png'],
+  dip:null,
+  general:null
  };
- const pair=files[pose]||files.general;
- return pair.map(f=>base+encodeURIComponent(f));
+ const pair=Object.prototype.hasOwnProperty.call(files,pose)?files[pose]:files.general;
+ return pair?pair.map(f=>base+encodeURIComponent(f)):null;
 }
 function exerciseGuide(name){
  const n=name.toLowerCase();
@@ -368,10 +372,10 @@ function exerciseGuide(name){
 }
 function guideList(items){return `<ul>${items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`}
 function showExercise(name,fromModal=false){
- const pair=exerciseImagePair(name),g=exerciseGuide(name);
- openModal(`<h2>${esc(name)}</h2><div class="real-exercise-grid"><figure><figcaption>Αρχική θέση</figcaption><div class="real-exercise-image"><img src="${pair[0]}" alt="Αρχική θέση για ${esc(name)}"></div></figure><div class="exercise-arrow">→</div><figure><figcaption>Τελική θέση</figcaption><div class="real-exercise-image"><img src="${pair[1]}" alt="Τελική θέση για ${esc(name)}"></div></figure></div><div class="exercise-guide"><section><h3>▶ Εκτέλεση</h3>${guideList(g.steps)}</section><section><h3>💪 Μυϊκές ομάδες</h3>${guideList(g.muscles)}</section><section><h3>💨 Αναπνοή</h3><p>${esc(g.breathing)}</p></section><section><h3>⚠️ Συχνά λάθη</h3>${guideList(g.mistakes)}</section><section><h3>💡 Συμβουλές</h3>${guideList(g.tips)}</section></div><p class="exercise-credit">Εικονογράφηση: Everkinetic μέσω Wikimedia Commons — CC BY-SA 3.0.</p><div class="modal-actions"><button value="cancel" class="primary">Κλείσιμο</button></div>`);
+ const pair=exerciseImagePair(name),g=exerciseGuide(name),visual=pair?`<div class="real-exercise-grid"><figure><figcaption>Αρχική θέση</figcaption><div class="real-exercise-image"><img src="${pair[0]}" alt="Αρχική θέση για ${esc(name)}"></div></figure><div class="exercise-arrow">→</div><figure><figcaption>Τελική θέση</figcaption><div class="real-exercise-image"><img src="${pair[1]}" alt="Τελική θέση για ${esc(name)}"></div></figure></div>`:`<div class="specific-exercise-svg">${exerciseSvg(name)}</div>`;
+ openModal(`<h2>${esc(name)}</h2>${visual}<div class="exercise-guide"><section><h3>▶ Εκτέλεση</h3>${guideList(g.steps)}</section><section><h3>💪 Μυϊκές ομάδες</h3>${guideList(g.muscles)}</section><section><h3>💨 Αναπνοή</h3><p>${esc(g.breathing)}</p></section><section><h3>⚠️ Συχνά λάθη</h3>${guideList(g.mistakes)}</section><section><h3>💡 Συμβουλές</h3>${guideList(g.tips)}</section></div>${pair?'<p class="exercise-credit">Εικονογράφηση: Everkinetic μέσω Wikimedia Commons — CC BY-SA 3.0.</p>':''}<div class="modal-actions"><button value="cancel" class="primary">Κλείσιμο</button></div>`);
  const fallback=exerciseSvg(name);
- $$('#modalContent .real-exercise-image img').forEach(img=>img.onerror=()=>{const box=img.parentElement;box.innerHTML=fallback;box.classList.add('fallback-svg')});
+ $$('#modalContent .real-exercise-image img').forEach(img=>img.onerror=()=>{const grid=img.closest('.real-exercise-grid');if(grid){grid.outerHTML=`<div class="specific-exercise-svg">${fallback}</div>`}});
 }
 
 $('#themeBtn').onclick=()=>{state.theme=state.theme==='dark'?'light':'dark';save()};
