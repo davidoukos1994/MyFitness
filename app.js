@@ -114,8 +114,9 @@ function renderCalendar(){
   const dt=new Date(yr,mon,d),iso=[dt.getFullYear(),String(dt.getMonth()+1).padStart(2,'0'),String(dt.getDate()).padStart(2,'0')].join('-');
   const b=document.createElement('button');
   b.type='button';
-  b.className='day'+(out?' out':'')+(iso===todayISO()?' today':'')+(iso===selectedDate?' selected':'');
-  b.innerHTML=`<span>${d}</span>${(person().calendar[iso]||[]).length?'<i class="dot"></i>':''}`;
+  const hasWorkout=(person().calendar[iso]||[]).length>0;
+  b.className='day'+(out?' out':'')+(iso===todayISO()?' today':'')+(hasWorkout?' has-workout':'')+(iso===selectedDate?' selected':'');
+  b.innerHTML=`<span>${d}</span>`;
   b.onclick=()=>{
    selectedDate=iso;
    renderCalendar();
@@ -213,7 +214,29 @@ function exerciseSvg(name){
  const fig=(x,end)=> pose==='hinge'||pose==='row'?hinge(x,end,pose):pose==='push'||pose==='plank'||pose==='bridge'?floorPose(x,end,pose):standing(x,end,pose);
  return `<svg viewBox="0 0 760 340" role="img" aria-label="Οδηγίες εκτέλεσης ${esc(name)}"><defs><style>.skin{fill:#d7a47e;stroke:#684b3d;stroke-width:3}.hair{fill:#3b2a22}.shirt{fill:var(--primary);stroke:#263746;stroke-width:4;stroke-linejoin:round}.limb,.arm{fill:none;stroke:#d7a47e;stroke-width:18;stroke-linecap:round;stroke-linejoin:round}.shoe{fill:none;stroke:#263746;stroke-width:12;stroke-linecap:round}.metal{fill:#6b7884}.weight{fill:#263746}.label{fill:var(--text);font:600 19px system-ui}.hint{fill:var(--muted);font:16px system-ui}.arrow{fill:none;stroke:var(--primary);stroke-width:8;stroke-linecap:round;stroke-linejoin:round}</style></defs><rect x="14" y="14" width="350" height="312" rx="22" fill="var(--surface-2)"/><rect x="396" y="14" width="350" height="312" rx="22" fill="var(--surface-2)"/><text class="label" x="189" y="42" text-anchor="middle">Αρχική θέση</text><text class="label" x="571" y="42" text-anchor="middle">Τελική θέση</text>${fig(190,false)}${fig(570,true)}<path class="arrow" d="M365 170 H393 M383 158 L395 170 L383 182"/></svg>`;
 }
-function showExercise(name,fromModal=false){const previous=fromModal?$('#modalContent').innerHTML:null;openModal(`<h2>${esc(name)}</h2><div class="exercise-figure">${exerciseSvg(name)}</div><p class="muted">Η εικόνα δείχνει ανθρώπινη φιγούρα, τη στάση του σώματος και τη θέση των βαρών στην αρχική και τελική φάση.</p><div class="modal-actions"><button value="cancel" class="primary">Κλείσιμο</button></div>`)}
+function exerciseImagePair(name){
+ const pose=exercisePose(name), base='https://commons.wikimedia.org/wiki/Special:Redirect/file/';
+ const files={
+  squat:['Squats-1.png','Squats-2-1.png'],
+  hinge:['Romanian-deadlift-1.png','Romanian-deadlift-2.png'],
+  press:['Dumbbell-shoulder-press-1.png','Dumbbell-shoulder-press-2.png'],
+  curl:['Biceps curl with dumbbell 1.svg','Biceps curl with dumbbell 2.svg'],
+  row:['Dumbbell-upright-row-1.png','Dumbbell-upright-row-2.png'],
+  push:['Dumbbell-bench-press-1.png','Dumbbell-bench-press-2.png'],
+  triceps:['One-arm-triceps-extension-1.png','One-arm-triceps-extension-2.png'],
+  bridge:['Squats-1.png','Squats-2-1.png'],
+  plank:['Push-up-1.png','Push-up-2.png'],
+  general:['Dumbbell-shoulder-press-1.png','Dumbbell-shoulder-press-2.png']
+ };
+ const pair=files[pose]||files.general;
+ return pair.map(f=>base+encodeURIComponent(f));
+}
+function showExercise(name,fromModal=false){
+ const pair=exerciseImagePair(name);
+ openModal(`<h2>${esc(name)}</h2><div class="real-exercise-grid"><figure><figcaption>Αρχική θέση</figcaption><div class="real-exercise-image"><img src="${pair[0]}" alt="Αρχική θέση για ${esc(name)}"></div></figure><div class="exercise-arrow">→</div><figure><figcaption>Τελική θέση</figcaption><div class="real-exercise-image"><img src="${pair[1]}" alt="Τελική θέση για ${esc(name)}"></div></figure></div><p class="muted">Δες τη στάση του σώματος και τη θέση των βαρών στην αρχική και τελική φάση.</p><p class="exercise-credit">Εικονογράφηση: Everkinetic μέσω Wikimedia Commons — CC BY-SA 3.0.</p><div class="modal-actions"><button value="cancel" class="primary">Κλείσιμο</button></div>`);
+ const fallback=exerciseSvg(name);
+ $$('#modalContent .real-exercise-image img').forEach(img=>img.onerror=()=>{const box=img.parentElement;box.innerHTML=fallback;box.classList.add('fallback-svg')});
+}
 
 $('#themeBtn').onclick=()=>{state.theme=state.theme==='dark'?'light':'dark';save()};
 $('#exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fitplanner-backup-'+todayISO()+'.json';a.click();URL.revokeObjectURL(a.href)};
